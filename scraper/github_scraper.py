@@ -3,12 +3,18 @@ import base64
 import requests
 from pathlib import Path
 from typing import List
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # GitHub API base URL
 GITHUB_API_URL = "https://api.github.com"
 
-# GitHub Personal Access Token
-GITHUB_TOKEN = "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"
+# Retrieve GitHub Personal Access Token from environment variables
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+if not GITHUB_TOKEN:
+    raise ValueError("GitHub token not found! Set the GITHUB_TOKEN environment variable.")
+
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
 def fetch_repo_tree(owner: str, repo: str) -> List[dict]:
