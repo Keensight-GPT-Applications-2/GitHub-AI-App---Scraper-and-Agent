@@ -2,10 +2,12 @@ import os
 import ast
 import sys
 from pathlib import Path
-from models.pydantic_generator import generate_pydantic_models, save_pydantic_models
 
-project_root = Path(__file__).resolve().parent.parent
+
+project_root = Path(__file__).resolve().parent.parent  # Adjust path to point to the root folder
 sys.path.append(str(project_root))
+
+from models.pydantic_generator import generate_pydantic_models, save_pydantic_models
 
 def parse_python_file(file_path):
     """Parse a Python file and extract functions, classes, and docstrings."""
@@ -73,7 +75,7 @@ def get_latest_scraped_repo(base_dir):
 
 if __name__ == "__main__":
     # Automatically locate the latest scraped repository
-    base_scraped_dir = "./scraper/scraped_repos"
+    base_scraped_dir = "../scraper/scraped_repos"
     latest_repo_dir = get_latest_scraped_repo(base_scraped_dir)
 
     if latest_repo_dir:
