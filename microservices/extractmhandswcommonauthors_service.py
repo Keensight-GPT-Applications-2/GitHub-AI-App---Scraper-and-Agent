@@ -1,9 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import ValidationError
 from models.generated_models.model_22 import ExtractmhandswcommonauthorsInput, ExtractmhandswcommonauthorsOutput
 
 app = FastAPI()
 
-@app.post("/extractmhandswcommonauthors")
+@app.post("/extractmhandswcommonauthors_service/extractmhandswcommonauthors")
 def process_extractmhandswcommonauthors(data: ExtractmhandswcommonauthorsInput):
-    # Example processing
-    return ExtractmhandswcommonauthorsOutput(result="Processed")
+    try:
+        # Example processing
+        return ExtractmhandswcommonauthorsOutput(result="Processed")
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())

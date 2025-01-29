@@ -1,5 +1,5 @@
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pathlib import Path
 import importlib.util
 from importlib import import_module
@@ -92,4 +92,6 @@ def get_model(model_name: str):
     logging.info(f"Available models: {list(generated_models.keys())}")
     if model_name in generated_models:
         return generated_models[model_name].schema()
-    return {"error": f"Model {model_name} not found"}
+    else:
+        # Return a 404 status code for invalid models
+        raise HTTPException(status_code=404, detail=f"Model {model_name} not found")
