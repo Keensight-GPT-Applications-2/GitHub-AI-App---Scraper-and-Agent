@@ -1,8 +1,10 @@
+import os
 import re
 from pydantic import BaseModel
-from typing import Any
+from typing import Any, Optional
 from pathlib import Path
-
+from ai_integration.deepseek_api import query_deepseek  # ✅ Import DeepSeek API
+import json
 
 def sanitize_function_name(name):
     """Sanitize function names to make them valid Python identifiers."""
@@ -12,37 +14,54 @@ def sanitize_function_name(name):
         raise ValueError(f"Invalid function name: {name}")
     return name
 
+def extract_models_from_response(response_content):
+    """Extracts input and output models from DeepSeek response."""
+    if isinstance(response_content, dict):  # ✅ Ensure it's a dictionary
+        input_fields = response_content.get("input", {})
+        output_type = response_content.get("output", "Optional[Any]")
+        return input_fields, output_type
+    else:
+        print("⚠️ Unexpected response format from DeepSeek. Using default values.")
+        return {}, "Optional[Any]"
 
 def generate_pydantic_models(parsed_data):
     """
-    Generate Pydantic input/output models for parsed functions.
+    Generate Pydantic input/output models with DeepSeek AI assistance.
     """
     models = []
-
-    # Add necessary imports for each file
-    imports = (
-        "from pydantic import BaseModel\n"
-        "from typing import Any, Optional\n\n"
-    )
-
+    imports = """
+from pydantic import BaseModel
+from typing import Any, Optional
+"""
+    
     for file_name, content in parsed_data.items():
         for function in content["functions"]:
-            # Sanitize function name
             safe_function_name = sanitize_function_name(function["name"])
-
-            # Input Model
             input_model_name = f"{safe_function_name}Input"
-            input_model_fields = "\n".join(
-                [f"    {param}: Any  # Default type is 'Any'" for param in function["parameters"]]
-            )
-
-            # Output Model
             output_model_name = f"{safe_function_name}Output"
-            output_model_field = (
-                f"    result: {function['return_type'] or 'Optional[Any]'} = None  # Return type inferred or defaulted"
-            )
 
-            # Combine Models
+            # **🧠 Ask DeepSeek for better input/output models**
+            deepseek_prompt = (
+                f"Generate a JSON response with 'input' and 'output' fields. "
+                f"For function `{function['name']}` with parameters: {function['parameters']} "
+                f"and return type: {function['return_type']}"
+            )
+            deepseek_response = query_deepseek(deepseek_prompt)
+
+            if deepseek_response:
+                input_fields, output_type = extract_models_from_response(deepseek_response)
+            else:
+                print(f"⚠️ DeepSeek failed for {function['name']}. Using default types.")
+                input_fields = {param: "Any" for param in function["parameters"]}
+                output_type = function["return_type"] or "Optional[Any]"
+
+            # **Generate Input Model**
+            input_model_fields = "\n".join([f"    {param}: {dtype}" for param, dtype in input_fields.items()])
+            
+            # **Generate Output Model**
+            output_model_field = f"    result: {output_type} = None"
+            
+            # **Combine into a Model Code String**
             model_code = f"""
 {imports}
 class {input_model_name}(BaseModel):
@@ -52,33 +71,16 @@ class {output_model_name}(BaseModel):
 {output_model_field}
 """
             models.append(model_code)
-
+    
     return models
 
-
 def save_pydantic_models(models, output_dir=None):
-    """
-    Save Pydantic models to .py files.
-    """
-    # Set the correct output directory relative to the project root
-    if output_dir is None:
-        output_dir = Path(__file__).resolve().parent.parent / "models/generated_models"
-    else:
-        output_dir = Path(output_dir).resolve()
-
-    output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    # Save each model in a separate file
+    """Save Pydantic models to .py files."""
+    output_dir = Path(output_dir or "models/generated_models").resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
     for idx, model_code in enumerate(models, start=1):
-        file_path = output_path / f"model_{idx}.py"
-
-        # Add a header comment to the model file
-        file_header = f'''"""
-Auto-generated Pydantic Models
-File: {file_path.name}
-"""
-'''
+        file_path = output_dir / f"model_{idx}.py"
         with open(file_path, "w", encoding="utf-8") as f:
-            f.write(file_header + model_code.strip())
-        print(f"Model saved to {file_path}")
+            f.write(f'"""\nAuto-generated Pydantic Models\nFile: {file_path.name}\n"""\n' + model_code.strip())
+        print(f"✅ Model saved to {file_path}")
