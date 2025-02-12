@@ -1,12 +1,13 @@
 """
 Auto-generated Pydantic Models
-File: model_11.py
+File: model_19.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class Tokenizer_porterInput(BaseModel):
-    pass
+class ExtractsuicidalwatchInput(BaseModel):
+    self: Any
+    reddit: Any
 
-class Tokenizer_porterOutput(BaseModel):
+class ExtractsuicidalwatchOutput(BaseModel):
     result: Optional[Any] = None

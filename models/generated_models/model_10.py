@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_6.py
+File: model_10.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class AdmincnnmodelInput(BaseModel):
-    pass
+class Preprocess_tweetInput(BaseModel):
+    text: Any
 
-class AdmincnnmodelOutput(BaseModel):
+class Preprocess_tweetOutput(BaseModel):
     result: Optional[Any] = None

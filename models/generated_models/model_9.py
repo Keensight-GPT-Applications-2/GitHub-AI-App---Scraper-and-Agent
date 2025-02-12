@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from typing import Any, Optional
 
 class DetecttypesInput(BaseModel):
-    pass
+    selfself: Any
+    tweet: Any
 
 class DetecttypesOutput(BaseModel):
     result: Optional[Any] = None

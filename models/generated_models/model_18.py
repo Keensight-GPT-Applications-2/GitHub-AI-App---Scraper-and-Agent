@@ -1,12 +1,13 @@
 """
 Auto-generated Pydantic Models
-File: model_23.py
+File: model_18.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class ExtractalldataforcommonauthorsInput(BaseModel):
-    pass
+class Wordcloud2Input(BaseModel):
+    self: Any
+    filename: Any
 
-class ExtractalldataforcommonauthorsOutput(BaseModel):
+class Wordcloud2Output(BaseModel):
     result: Optional[Any] = None

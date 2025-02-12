@@ -1,12 +1,13 @@
 """
 Auto-generated Pydantic Models
-File: model_1.py
+File: model_16.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class AdminlogincheckInput(BaseModel):
-    pass
+class ExtractmentalhealthInput(BaseModel):
+    self: Any
+    reddit: Any
 
-class AdminlogincheckOutput(BaseModel):
+class ExtractmentalhealthOutput(BaseModel):
     result: Optional[Any] = None

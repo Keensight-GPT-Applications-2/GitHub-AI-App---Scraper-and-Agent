@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_17.py
+File: model_6.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class WordcloudInput(BaseModel):
-    pass
+class AdmincnnmodelInput(BaseModel):
+    request: Any
 
-class WordcloudOutput(BaseModel):
+class AdmincnnmodelOutput(BaseModel):
     result: Optional[Any] = None

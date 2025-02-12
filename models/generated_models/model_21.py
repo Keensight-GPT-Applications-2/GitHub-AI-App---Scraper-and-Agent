@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from typing import Any, Optional
 
 class ExtractauthorswithtimestampInput(BaseModel):
-    pass
+    fromFile: Any
+    toFile: Any
 
 class ExtractauthorswithtimestampOutput(BaseModel):
     result: Optional[Any] = None

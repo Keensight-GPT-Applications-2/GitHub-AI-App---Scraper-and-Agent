@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_14.py
+File: model_3.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class Preprocess_textInput(BaseModel):
-    pass
+class ViewregisteredusersInput(BaseModel):
+    request: Any
 
-class Preprocess_textOutput(BaseModel):
+class ViewregisteredusersOutput(BaseModel):
     result: Optional[Any] = None

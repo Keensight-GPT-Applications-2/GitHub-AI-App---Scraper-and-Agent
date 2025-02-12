@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_2.py
+File: model_12.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class AdminhomeInput(BaseModel):
-    pass
+class TokenizerInput(BaseModel):
+    text: Any
 
-class AdminhomeOutput(BaseModel):
+class TokenizerOutput(BaseModel):
     result: Optional[Any] = None

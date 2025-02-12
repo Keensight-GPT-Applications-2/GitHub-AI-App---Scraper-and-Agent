@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_4.py
+File: model_15.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class AdminactivausersInput(BaseModel):
-    pass
+class Remove_tagsInput(BaseModel):
+    text: Any
 
-class AdminactivausersOutput(BaseModel):
+class Remove_tagsOutput(BaseModel):
     result: Optional[Any] = None

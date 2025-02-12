@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_16.py
+File: model_11.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class ExtractmentalhealthInput(BaseModel):
-    pass
+class Tokenizer_porterInput(BaseModel):
+    text: Any
 
-class ExtractmentalhealthOutput(BaseModel):
+class Tokenizer_porterOutput(BaseModel):
     result: Optional[Any] = None

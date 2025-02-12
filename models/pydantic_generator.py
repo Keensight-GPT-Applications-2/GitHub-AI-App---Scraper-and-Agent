@@ -3,7 +3,7 @@ import re
 from pydantic import BaseModel
 from typing import Any, Optional
 from pathlib import Path
-from ai_integration.deepseek_api import query_deepseek  # ✅ Import DeepSeek API
+from ai_integration.deepseek_api import query_deepseek
 import json
 
 def sanitize_function_name(name):
@@ -75,12 +75,20 @@ class {output_model_name}(BaseModel):
     return models
 
 def save_pydantic_models(models, output_dir=None):
-    """Save Pydantic models to .py files."""
-    output_dir = Path(output_dir or "models/generated_models").resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    """Save Pydantic models to github_scraper/models/generated_models/"""
     
+    # ✅ Ensure the correct path relative to the project root
+    project_root = Path(__file__).resolve().parent.parent  # Moves up from 'models'
+    output_dir = project_root / "models/generated_models"  # ✅ Set to github_scraper/models/generated_models
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     for idx, model_code in enumerate(models, start=1):
         file_path = output_dir / f"model_{idx}.py"
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(f'"""\nAuto-generated Pydantic Models\nFile: {file_path.name}\n"""\n' + model_code.strip())
+        
         print(f"✅ Model saved to {file_path}")
+
+    print(f"📁 All models saved in: {output_dir}")
+

@@ -1,12 +1,12 @@
 """
 Auto-generated Pydantic Models
-File: model_18.py
+File: model_7.py
 """
 from pydantic import BaseModel
 from typing import Any, Optional
 
-class Wordcloud2Input(BaseModel):
-    pass
+class StartprocessInput(BaseModel):
+    self: Any
 
-class Wordcloud2Output(BaseModel):
+class StartprocessOutput(BaseModel):
     result: Optional[Any] = None

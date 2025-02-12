@@ -1,3 +1,4 @@
+import json
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -15,18 +16,29 @@ def query_deepseek(prompt: str):
         raise ValueError("❌ DeepSeek API Key is missing. Add it to your .env file.")
 
     try:
-        messages = [{"role": "user", "content": prompt}]  # ✅ Ensure it's a list of dictionaries
+        messages = [{"role": "user", "content": prompt}]
         response = client.chat.completions.create(
-            model="deepseek-chat",  # ✅ Use "deepseek-chat" to avoid errors
-            messages=messages  # ✅ Pass as a list, not a string
+            model="deepseek-chat",
+            messages=messages
         )
 
-        # Extract response safely
-        if response and response.choices:
-            content = response.choices[0].message.content
-            return {"content": content}
-        else:
+        # ✅ Handle Empty Response
+        if not response or not hasattr(response, "choices") or not response.choices:
             print("⚠️ DeepSeek returned an empty response.")
+            return None
+
+        # ✅ Extract Response Safely
+        content = response.choices[0].message.content
+        if not content:
+            print("⚠️ DeepSeek response content is empty.")
+            return None
+        
+        # ✅ Ensure JSON format
+        try:
+            response_json = json.loads(content)
+            return response_json  # Ensure it returns a valid dictionary
+        except json.JSONDecodeError:
+            print("❌ DeepSeek returned invalid JSON. Falling back to default types.")
             return None
 
     except Exception as e:
