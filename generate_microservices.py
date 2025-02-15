@@ -2,12 +2,12 @@ import os
 import importlib.util
 from pathlib import Path
 
-def generate_microservices(models_dir="models/generated_models", output_dir="microservices", scraped_repo_dir="scraped_repos"):
+def generate_microservices(models_dir="models/generated_models", output_dir="microservices"):
     """
-    Generate FastAPI microservices that dynamically execute functions from scraped repositories.
+    Generate FastAPI microservices that dynamically execute functions from generated models.
     """
-    models_path = Path(models_dir)
-    output_path = Path(output_dir)
+    models_path = Path(models_dir).resolve()
+    output_path = Path(output_dir).resolve()
     output_path.mkdir(parents=True, exist_ok=True)
 
     print("🔄 Scanning models directory for .py files...")
@@ -20,10 +20,9 @@ def generate_microservices(models_dir="models/generated_models", output_dir="mic
             model_code = f.read()
 
         # Extract Input and Output model names from the model code
-        lines = model_code.splitlines()
         input_model_name, output_model_name = None, None
 
-        for line in lines:
+        for line in model_code.splitlines():
             if line.strip().startswith("class") and "Input" in line:
                 input_model_name = line.split("class")[1].split("(")[0].strip()
             if line.strip().startswith("class") and "Output" in line:
@@ -34,7 +33,7 @@ def generate_microservices(models_dir="models/generated_models", output_dir="mic
             continue
 
         # Derive function and endpoint names
-        function_name = input_model_name.replace("Input", "")  # Remove "Input"
+        function_name = input_model_name  # Keep Input suffix
         endpoint_name = function_name.lower()  # Lowercase for consistency
 
         print(f"✅ Extracted: Input Model = {input_model_name}, Output Model = {output_model_name}")
@@ -50,29 +49,34 @@ from pathlib import Path
 
 app = FastAPI()
 
-SCRAPED_REPO_DIR = "{scraped_repo_dir}"
+MODELS_DIR = Path("{models_dir}").resolve()
 
 def dynamic_import_function(module_path, function_name):
-    \"\"\"Dynamically import a function from a scraped module.\"\"\"
-    spec = importlib.util.spec_from_file_location("scraped_module", module_path)
+    \"\"\"Dynamically import a function from a generated model.\"\"\" 
+    spec = importlib.util.spec_from_file_location("generated_model", module_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+
+    available_functions = [attr for attr in dir(module) if callable(getattr(module, attr))]
+    print(f"🔍 Available functions in {{module_path}}: {{available_functions}}")
+    
     return getattr(module, function_name, None)
 
 @app.post("/{endpoint_name}_service/{endpoint_name}")
 def process_{endpoint_name}(data: {input_model_name}):
-    \"\"\"Dynamically execute the scraped function.\"\"\"
-    # Locate the scraped Python files
-    repo_path = Path(SCRAPED_REPO_DIR)
-    python_files = list(repo_path.rglob("*.py"))
+    \"\"\"Dynamically execute the function from generated models.\"\"\"
+    # Locate the Python files in models directory
+    model_path = MODELS_DIR
+    python_files = list(model_path.rglob("*.py"))
 
     for file_path in python_files:
         function_to_call = dynamic_import_function(str(file_path), "{function_name}")
         if function_to_call:
+            print(f"✅ Function {function_name} found in: {{file_path}}")
             result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
             return {output_model_name}(result=result)
 
-    raise HTTPException(status_code=404, detail="Function not found in scraped repository")
+    raise HTTPException(status_code=404, detail="Function '{function_name}' not found in generated models")
 """
 
         # Save as a new microservice file

@@ -9,6 +9,15 @@ sys.path.append(str(project_root))
 
 from models.pydantic_generator import generate_pydantic_models, save_pydantic_models
 
+def extract_return_type(node):
+    """Extract return type from AST node, handling generics."""
+    if isinstance(node, ast.Name):
+        return node.id
+    elif isinstance(node, ast.Subscript):  # Handle generics like List[str]
+        return f"{node.value.id}[{node.slice.id}]"
+    else:
+        return "Optional[Any]"
+
 def parse_python_file(file_path):
     """Parse a Python file and extract functions, classes, and docstrings."""
     try:
@@ -24,12 +33,16 @@ def parse_python_file(file_path):
         # Walk through the AST nodes
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
+                params = [arg.arg for arg in node.args.args if arg.arg != "self"]  # Remove 'self'
+                return_type = extract_return_type(node.returns) if node.returns else "Optional[Any]"
+
                 functions.append({
                     "name": node.name,
                     "docstring": ast.get_docstring(node) or "No docstring provided.",
-                    "parameters": [arg.arg for arg in node.args.args],
-                    "return_type": getattr(node.returns, 'id', None) if node.returns else None
+                    "parameters": params,
+                    "return_type": return_type
                 })
+
             elif isinstance(node, ast.ClassDef):
                 classes.append({
                     "name": node.name,
@@ -40,15 +53,14 @@ def parse_python_file(file_path):
         return {"functions": functions, "classes": classes}
 
     except SyntaxError as e:
-        print(f"SyntaxError in file {file_path}: {e}")
+        print(f"❌ SyntaxError in file {file_path}: {e}")
         return {"functions": [], "classes": []}
-
 
 def parse_directory(directory_path):
     """Parse all Python files in a directory."""
     directory_path = Path(directory_path)
     if not directory_path.exists():
-        print(f"Error: Directory '{directory_path}' does not exist.")
+        print(f"❌ Error: Directory '{directory_path}' does not exist.")
         return {}
 
     results = {}
@@ -60,18 +72,16 @@ def parse_directory(directory_path):
 
     return results
 
-
 def get_latest_scraped_repo(base_dir):
     """Find the most recently modified repository in the scraped_repos folder."""
     base_dir = Path(base_dir)
     if not base_dir.exists():
-        print(f"Error: Base directory '{base_dir}' does not exist.")
+        print(f"❌ Error: Base directory '{base_dir}' does not exist.")
         return None
 
     # Find the most recently modified folder in the base directory
     latest_repo = max(base_dir.glob("*/"), key=os.path.getmtime, default=None)
     return latest_repo
-
 
 if __name__ == "__main__":
     # Automatically locate the latest scraped repository
@@ -101,11 +111,11 @@ if __name__ == "__main__":
                 else:
                     print("⚠️ No functions or classes found in this file.")
 
-            # Generate Pydantic Models
+            # ✅ Generate Pydantic Models with correct arguments
             print("\n🚀 Generating Pydantic models using DeepSeek...")
             models = generate_pydantic_models(parsed_results)
 
-            # Save the models to files
+            # ✅ Save the models to files in the correct directory
             print("\n💾 Saving Pydantic models...")
             save_pydantic_models(models)
 
