@@ -60,13 +60,16 @@ def include_microservices(app):
         logging.error("❌ Microservices directory does not exist.")
         return
 
-    for service_file in microservices_dir.glob("*.py"):
+    service_files = list(microservices_dir.glob("*.py"))
+    logging.info(f"🛠️ Found microservices: {[s.stem for s in service_files]}")  # Debug print
+
+    for service_file in service_files:
         service_name = service_file.stem
         try:
             logging.info(f"🔗 Including service: {service_name}")
             module = import_module(f"microservices.{service_name}")
-            if hasattr(module, "app"):
-                app.include_router(module.app.router, prefix=f"/{service_name}")
+            if hasattr(module, "app"):  # ✅ Fix: Check if `app` is in microservice
+                app.include_router(module.app.router)  # ✅ Fix: Use `app.router`
         except Exception as e:
             logging.error(f"❌ Failed to include service {service_name}: {e}")
 
