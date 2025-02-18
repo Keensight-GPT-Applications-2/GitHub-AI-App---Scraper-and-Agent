@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.alluserresults import AlluserresultsInput, AlluserresultsOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/alluserresults_service/alluserresultsinput")
-def process_alluserresultsinput(data: AlluserresultsInput):
-    """Dynamically execute AlluserresultsInput from generated models.""" 
+
+@router.post("/alluserresults_service/alluserresults")
+def process_alluserresults(data: AlluserresultsInput):
+    """Dynamically execute AllUserResults from generated models.""" 
     model_path = MODELS_DIR / "alluserresults.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "AlluserresultsInput")
+    function_to_call = dynamic_import_function(str(model_path), "AllUserResults")
     if function_to_call:
-        print(f"✅ Function AlluserresultsInput found in: {model_path}")
+        print(f"✅ Function AllUserResults found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return AlluserresultsOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'AlluserresultsInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'AllUserResults' not found in generated models")

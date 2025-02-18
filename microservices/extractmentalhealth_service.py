@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.extractmentalhealth import ExtractmentalhealthInput, ExtractmentalhealthOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/extractmentalhealth_service/extractmentalhealthinput")
-def process_extractmentalhealthinput(data: ExtractmentalhealthInput):
-    """Dynamically execute ExtractmentalhealthInput from generated models.""" 
+
+@router.post("/extractmentalhealth_service/extractmentalhealth")
+def process_extractmentalhealth(data: ExtractmentalhealthInput):
+    """Dynamically execute extractMentalHealth from generated models.""" 
     model_path = MODELS_DIR / "extractmentalhealth.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "ExtractmentalhealthInput")
+    function_to_call = dynamic_import_function(str(model_path), "extractMentalHealth")
     if function_to_call:
-        print(f"✅ Function ExtractmentalhealthInput found in: {model_path}")
+        print(f"✅ Function extractMentalHealth found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return ExtractmentalhealthOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'ExtractmentalhealthInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'extractMentalHealth' not found in generated models")

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.extractmentalhealthcsv import ExtractmentalhealthcsvInput, ExtractmentalhealthcsvOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/extractmentalhealthcsv_service/extractmentalhealthcsvinput")
-def process_extractmentalhealthcsvinput(data: ExtractmentalhealthcsvInput):
-    """Dynamically execute ExtractmentalhealthcsvInput from generated models.""" 
+
+@router.post("/extractmentalhealthcsv_service/extractmentalhealthcsv")
+def process_extractmentalhealthcsv(data: ExtractmentalhealthcsvInput):
+    """Dynamically execute extractMentalHealthCSV from generated models.""" 
     model_path = MODELS_DIR / "extractmentalhealthcsv.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "ExtractmentalhealthcsvInput")
+    function_to_call = dynamic_import_function(str(model_path), "extractMentalHealthCSV")
     if function_to_call:
-        print(f"✅ Function ExtractmentalhealthcsvInput found in: {model_path}")
+        print(f"✅ Function extractMentalHealthCSV found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return ExtractmentalhealthcsvOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'ExtractmentalhealthcsvInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'extractMentalHealthCSV' not found in generated models")

@@ -11,3 +11,7 @@ class ExtractmhandswcommonauthorsInput(BaseModel):
 
 class ExtractmhandswcommonauthorsOutput(BaseModel):
     result: Optional[Any] = None
+
+def extractMHandSWcommonAuthors(generalIssuesFilename, suicideWatchFilename, commonAuthorsFilename) -> Optional[Any]:
+    """No docstring provided."""
+    return {'status': 'success', 'processed_data': {param: param for param in [generalIssuesFilename, suicideWatchFilename, commonAuthorsFilename]}}

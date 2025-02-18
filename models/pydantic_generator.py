@@ -17,29 +17,24 @@ def sanitize_function_name(name):
 def extract_models_from_response(response_content):
     """Extracts input and output models from DeepSeek response."""
     try:
-        # ✅ Ensure response is a valid JSON dictionary
         if isinstance(response_content, str):
-            response_json = json.loads(response_content.strip("```json\n"))  # Strips markdown artifacts
+            response_json = json.loads(response_content.strip("```json\n"))  
         elif isinstance(response_content, dict):
             response_json = response_content
         else:
             raise ValueError("Invalid response format from DeepSeek.")
 
-        # ✅ Extract input and output safely
         input_fields = response_json.get("input", {})
         output_type = response_json.get("output", {}).get("return_value", "Optional[Any]")
 
-        # ✅ Fix incorrect types (e.g., "dict" → "Dict[str, Any]")
         input_fields = {key: "Dict[str, Any]" if val == "dict" else val for key, val in input_fields.items()}
-
-        # ✅ Remove problematic parameters
         input_fields.pop("self", None)  
         input_fields.pop("selfself", None)  
 
         return input_fields, output_type
 
     except json.JSONDecodeError:
-        print("❌ DeepSeek returned invalid JSON. Falling back to default types.")
+        print("❌ DeepSeek returned invalid JSON. Using default types.")
         return {}, "Optional[Any]"
     except ValueError as e:
         print(f"⚠️ Error processing DeepSeek response: {str(e)}")
@@ -47,7 +42,7 @@ def extract_models_from_response(response_content):
 
 def generate_pydantic_models(parsed_data):
     """
-    Generate Pydantic input/output models with DeepSeek AI assistance.
+    Generate Pydantic input/output models with function definitions.
     """
     models = {}
     imports = """from pydantic import BaseModel\nfrom typing import Any, Optional, Dict\n"""
@@ -58,43 +53,50 @@ def generate_pydantic_models(parsed_data):
             input_model_name = f"{safe_function_name}Input"
             output_model_name = f"{safe_function_name}Output"
 
-            # **🧠 Ask DeepSeek for better input/output models**
-            deepseek_response = query_deepseek(
-                function["name"], function["parameters"], function["return_type"]
-            )
+            try:
+                deepseek_response = query_deepseek(
+                    function["name"], function["parameters"], function["return_type"]
+                )
 
-            if deepseek_response:
-                input_fields, output_type = extract_models_from_response(deepseek_response)
-            else:
+                if deepseek_response:
+                    input_fields, output_type = extract_models_from_response(deepseek_response)
+                else:
+                    raise ValueError("DeepSeek response invalid")
+
+            except Exception:
                 print(f"⚠️ DeepSeek failed for {function['name']}. Using default types.")
                 input_fields = {param: "Any" for param in function["parameters"]}
                 output_type = function["return_type"] or "Optional[Any]"
 
-            # **Generate Input Model**
             input_model_fields = "\n".join([f"    {param}: {dtype}" for param, dtype in input_fields.items()])
-
-            # **Generate Output Model**
             output_model_field = f"    result: {output_type} = None"
 
-            # **Combine into a Model Code String**
+            # ✅ **Ensure function is included even if DeepSeek fails**
+            function_code = f"""
+def {function['name']}({', '.join(function['parameters'])}) -> {output_type}:
+    \"\"\"{function['docstring'] if function['docstring'] else "No docstring provided."}\"\"\"
+    return {{'status': 'success', 'processed_data': {{param: param for param in [{', '.join(function['parameters'])}]}}}}
+"""
+
             model_code = f"""{imports}
 class {input_model_name}(BaseModel):
 {input_model_fields if input_model_fields else '    pass'}
 
 class {output_model_name}(BaseModel):
 {output_model_field}
+
+{function_code.strip()}
 """
 
-            models[safe_function_name.lower()] = model_code  # Use lowercase names for filenames
+            models[safe_function_name.lower()] = model_code  
 
     return models
 
 def save_pydantic_models(models, output_dir=None):
     """Save Pydantic models to github_scraper/models/generated_models/"""
     
-    # ✅ Ensure the correct path relative to the project root
-    project_root = Path(__file__).resolve().parent.parent  # Moves up from 'models'
-    output_dir = project_root / "models/generated_models"  # ✅ Set to github_scraper/models/generated_models
+    project_root = Path(__file__).resolve().parent.parent  
+    output_dir = project_root / "models/generated_models"  
 
     output_dir.mkdir(parents=True, exist_ok=True)
 

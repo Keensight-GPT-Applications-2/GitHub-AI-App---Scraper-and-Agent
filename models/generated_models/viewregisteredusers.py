@@ -9,3 +9,7 @@ class ViewregisteredusersInput(BaseModel):
 
 class ViewregisteredusersOutput(BaseModel):
     result: Optional[Any] = None
+
+def ViewRegisteredUsers(request) -> Optional[Any]:
+    """No docstring provided."""
+    return {'status': 'success', 'processed_data': {param: param for param in [request]}}

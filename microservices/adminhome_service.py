@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.adminhome import AdminhomeInput, AdminhomeOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/adminhome_service/adminhomeinput")
-def process_adminhomeinput(data: AdminhomeInput):
-    """Dynamically execute AdminhomeInput from generated models.""" 
+
+@router.post("/adminhome_service/adminhome")
+def process_adminhome(data: AdminhomeInput):
+    """Dynamically execute AdminHome from generated models.""" 
     model_path = MODELS_DIR / "adminhome.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "AdminhomeInput")
+    function_to_call = dynamic_import_function(str(model_path), "AdminHome")
     if function_to_call:
-        print(f"✅ Function AdminhomeInput found in: {model_path}")
+        print(f"✅ Function AdminHome found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return AdminhomeOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'AdminhomeInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'AdminHome' not found in generated models")

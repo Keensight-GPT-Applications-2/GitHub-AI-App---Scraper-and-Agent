@@ -68,8 +68,8 @@ def include_microservices(app):
         try:
             logging.info(f"🔗 Including service: {service_name}")
             module = import_module(f"microservices.{service_name}")
-            if hasattr(module, "app"):  # ✅ Fix: Check if `app` is in microservice
-                app.include_router(module.app.router)  # ✅ Fix: Use `app.router`
+            if hasattr(module, "router"):  # ✅ Fix: Look for `router`, not `app`
+                app.include_router(module.router)
         except Exception as e:
             logging.error(f"❌ Failed to include service {service_name}: {e}")
 

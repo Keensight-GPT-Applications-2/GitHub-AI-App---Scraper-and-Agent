@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.tokenizer import TokenizerInput, TokenizerOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/tokenizer_service/tokenizerinput")
-def process_tokenizerinput(data: TokenizerInput):
-    """Dynamically execute TokenizerInput from generated models.""" 
+
+@router.post("/tokenizer_service/tokenizer")
+def process_tokenizer(data: TokenizerInput):
+    """Dynamically execute tokenizer from generated models.""" 
     model_path = MODELS_DIR / "tokenizer.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "TokenizerInput")
+    function_to_call = dynamic_import_function(str(model_path), "tokenizer")
     if function_to_call:
-        print(f"✅ Function TokenizerInput found in: {model_path}")
+        print(f"✅ Function tokenizer found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return TokenizerOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'TokenizerInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'tokenizer' not found in generated models")

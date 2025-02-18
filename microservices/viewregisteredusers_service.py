@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.viewregisteredusers import ViewregisteredusersInput, ViewregisteredusersOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/viewregisteredusers_service/viewregisteredusersinput")
-def process_viewregisteredusersinput(data: ViewregisteredusersInput):
-    """Dynamically execute ViewregisteredusersInput from generated models.""" 
+
+@router.post("/viewregisteredusers_service/viewregisteredusers")
+def process_viewregisteredusers(data: ViewregisteredusersInput):
+    """Dynamically execute ViewRegisteredUsers from generated models.""" 
     model_path = MODELS_DIR / "viewregisteredusers.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "ViewregisteredusersInput")
+    function_to_call = dynamic_import_function(str(model_path), "ViewRegisteredUsers")
     if function_to_call:
-        print(f"✅ Function ViewregisteredusersInput found in: {model_path}")
+        print(f"✅ Function ViewRegisteredUsers found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return ViewregisteredusersOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'ViewregisteredusersInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'ViewRegisteredUsers' not found in generated models")

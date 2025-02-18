@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.detecttypes import DetecttypesInput, DetecttypesOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/detecttypes_service/detecttypesinput")
-def process_detecttypesinput(data: DetecttypesInput):
-    """Dynamically execute DetecttypesInput from generated models.""" 
+
+@router.post("/detecttypes_service/detecttypes")
+def process_detecttypes(data: DetecttypesInput):
+    """Dynamically execute detectTypes from generated models.""" 
     model_path = MODELS_DIR / "detecttypes.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "DetecttypesInput")
+    function_to_call = dynamic_import_function(str(model_path), "detectTypes")
     if function_to_call:
-        print(f"✅ Function DetecttypesInput found in: {model_path}")
+        print(f"✅ Function detectTypes found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return DetecttypesOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'DetecttypesInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'detectTypes' not found in generated models")

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.preprocess_tweet import Preprocess_tweetInput, Preprocess_tweetOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/preprocess_tweet_service/preprocess_tweetinput")
-def process_preprocess_tweetinput(data: Preprocess_tweetInput):
-    """Dynamically execute Preprocess_tweetInput from generated models.""" 
+
+@router.post("/preprocess_tweet_service/preprocess_tweet")
+def process_preprocess_tweet(data: Preprocess_tweetInput):
+    """Dynamically execute preprocess_tweet from generated models.""" 
     model_path = MODELS_DIR / "preprocess_tweet.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "Preprocess_tweetInput")
+    function_to_call = dynamic_import_function(str(model_path), "preprocess_tweet")
     if function_to_call:
-        print(f"✅ Function Preprocess_tweetInput found in: {model_path}")
+        print(f"✅ Function preprocess_tweet found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return Preprocess_tweetOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'Preprocess_tweetInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'preprocess_tweet' not found in generated models")

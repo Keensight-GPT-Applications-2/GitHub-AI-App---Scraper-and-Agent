@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.generated_models.adminlogincheck import AdminlogincheckInput, AdminlogincheckOutput
 import importlib.util
 import os
@@ -19,18 +19,16 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 
-@router.post("/adminlogincheck_service/adminlogincheckinput")
-def process_adminlogincheckinput(data: AdminlogincheckInput):
-    """Dynamically execute AdminlogincheckInput from generated models.""" 
+
+@router.post("/adminlogincheck_service/adminlogincheck")
+def process_adminlogincheck(data: AdminlogincheckInput):
+    """Dynamically execute AdminLoginCheck from generated models.""" 
     model_path = MODELS_DIR / "adminlogincheck.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "AdminlogincheckInput")
+    function_to_call = dynamic_import_function(str(model_path), "AdminLoginCheck")
     if function_to_call:
-        print(f"✅ Function AdminlogincheckInput found in: {model_path}")
+        print(f"✅ Function AdminLoginCheck found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
         return AdminlogincheckOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'AdminlogincheckInput' not found in generated models")
-
-app = FastAPI()
-app.include_router(router)
+    raise HTTPException(status_code=404, detail="Function 'AdminLoginCheck' not found in generated models")

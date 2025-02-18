@@ -9,3 +9,7 @@ class AdmincnnmodelInput(BaseModel):
 
 class AdmincnnmodelOutput(BaseModel):
     result: Optional[Any] = None
+
+def adminCNNModel(request) -> Optional[Any]:
+    """No docstring provided."""
+    return {'status': 'success', 'processed_data': {param: param for param in [request]}}

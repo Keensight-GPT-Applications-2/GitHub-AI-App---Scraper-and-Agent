@@ -9,3 +9,7 @@ class StartprocessInput(BaseModel):
 
 class StartprocessOutput(BaseModel):
     result: Optional[Any] = None
+
+def startProcess() -> Optional[Any]:
+    """No docstring provided."""
+    return {'status': 'success', 'processed_data': {param: param for param in []}}

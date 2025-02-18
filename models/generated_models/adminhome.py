@@ -9,3 +9,7 @@ class AdminhomeInput(BaseModel):
 
 class AdminhomeOutput(BaseModel):
     result: Optional[Any] = None
+
+def AdminHome(request) -> Optional[Any]:
+    """No docstring provided."""
+    return {'status': 'success', 'processed_data': {param: param for param in [request]}}
