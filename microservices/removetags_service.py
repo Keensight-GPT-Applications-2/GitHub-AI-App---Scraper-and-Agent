@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.preprocess_text import Preprocess_textInput, Preprocess_textOutput
+from models.generated_models.RemoveTags import RemoveTagsInput, RemoveTagsOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -20,15 +20,15 @@ def dynamic_import_function(module_path, function_name):
     return getattr(module, function_name, None)
 
 
-@router.post("/preprocess_text_service/preprocess_text")
-def process_preprocess_text(data: Preprocess_textInput):
-    """Dynamically execute preprocess_text from generated models.""" 
-    model_path = MODELS_DIR / "preprocess_text.py"
+@router.post("/removetags_service/remove_tags")
+def process_remove_tags(data: RemoveTagsInput):
+    """Dynamically execute remove_tags from generated models.""" 
+    model_path = MODELS_DIR / "RemoveTags.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "preprocess_text")
+    function_to_call = dynamic_import_function(str(model_path), "remove_tags")
     if function_to_call:
-        print(f"✅ Function preprocess_text found in: {model_path}")
+        print(f"✅ Function remove_tags found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
-        return Preprocess_textOutput(result=result)
+        return RemoveTagsOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'preprocess_text' not found in generated models")
+    raise HTTPException(status_code=404, detail="Function 'remove_tags' not found in generated models")

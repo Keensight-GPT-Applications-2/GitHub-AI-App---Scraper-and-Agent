@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.startprocess import StartprocessInput, StartprocessOutput
+from models.generated_models.Startprocess import StartprocessInput, StartprocessOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/startprocess_service/startprocess")
 def process_startprocess(data: StartprocessInput):
     """Dynamically execute startProcess from generated models.""" 
-    model_path = MODELS_DIR / "startprocess.py"
+    model_path = MODELS_DIR / "Startprocess.py"
 
     function_to_call = dynamic_import_function(str(model_path), "startProcess")
     if function_to_call:

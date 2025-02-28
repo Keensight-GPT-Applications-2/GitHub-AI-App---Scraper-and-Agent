@@ -7,9 +7,10 @@ from pathlib import Path
 from ai_integration.deepseek_api import query_deepseek
 
 def sanitize_function_name(name):
-    """Sanitize function names to make them valid Python identifiers."""
-    name = name.replace("__", "").capitalize()
-    name = re.sub(r"[^0-9a-zA-Z_]", "", name)
+    """Sanitize function names to make them valid PascalCase class names."""
+    name = re.sub(r"[^0-9a-zA-Z_]", "", name)  # Remove invalid characters
+    name_parts = name.split("_")  # Split at underscores
+    name = "".join(word.capitalize() for word in name_parts)  # Convert to PascalCase
     if not name.isidentifier():
         raise ValueError(f"Invalid function name: {name}")
     return name
@@ -45,7 +46,7 @@ def generate_pydantic_models(parsed_data):
     Generate Pydantic input/output models with function definitions.
     """
     models = {}
-    imports = """from pydantic import BaseModel\nfrom typing import Any, Optional, Dict\n"""
+    imports = """from pydantic import BaseModel\nfrom typing import Any, Optional, Dict\nimport json\n"""
 
     for file_name, content in parsed_data.items():
         for function in content["functions"]:
@@ -75,8 +76,8 @@ def generate_pydantic_models(parsed_data):
             function_code = f"""
 def {function['name']}({', '.join(function['parameters'])}) -> {output_type}:
     \"\"\"{function['docstring'] if function['docstring'] else "No docstring provided."}\"\"\"
-    return {{'status': 'success', 'processed_data': {{param: param for param in [{', '.join(function['parameters'])}]}}}}
-"""
+    import json  # Ensure json is imported in each function
+    return {{'status': 'success', 'processed_data': json.dumps(request)}}"""
 
             model_code = f"""{imports}
 class {input_model_name}(BaseModel):
@@ -88,7 +89,7 @@ class {output_model_name}(BaseModel):
 {function_code.strip()}
 """
 
-            models[safe_function_name.lower()] = model_code  
+            models[safe_function_name] = model_code  
 
     return models
 

@@ -1,17 +1,19 @@
 """
-Auto-generated Pydantic Model: extractalldataforcommonauthors
+Auto-generated Pydantic Model: Extractalldataforcommonauthors
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
+import json
 
 class ExtractalldataforcommonauthorsInput(BaseModel):
-    postsFilename: Any
-    commonAuthorsFilename: Any
-    commonPostsFilename: Any
+    postsFilename: str
+    commonAuthorsFilename: str
+    commonPostsFilename: str
 
 class ExtractalldataforcommonauthorsOutput(BaseModel):
     result: Optional[Any] = None
 
 def extractAllDataForCommonAuthors(postsFilename, commonAuthorsFilename, commonPostsFilename) -> Optional[Any]:
     """No docstring provided."""
-    return {'status': 'success', 'processed_data': {param: param for param in [postsFilename, commonAuthorsFilename, commonPostsFilename]}}
+    import json  # Ensure json is imported in each function
+    return {'status': 'success', 'processed_data': json.dumps(request)}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.tokenizer_porter import Tokenizer_porterInput, Tokenizer_porterOutput
+from models.generated_models.PreprocessTweet import PreprocessTweetInput, PreprocessTweetOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -20,15 +20,15 @@ def dynamic_import_function(module_path, function_name):
     return getattr(module, function_name, None)
 
 
-@router.post("/tokenizer_porter_service/tokenizer_porter")
-def process_tokenizer_porter(data: Tokenizer_porterInput):
-    """Dynamically execute tokenizer_porter from generated models.""" 
-    model_path = MODELS_DIR / "tokenizer_porter.py"
+@router.post("/preprocesstweet_service/preprocess_tweet")
+def process_preprocess_tweet(data: PreprocessTweetInput):
+    """Dynamically execute preprocess_tweet from generated models.""" 
+    model_path = MODELS_DIR / "PreprocessTweet.py"
 
-    function_to_call = dynamic_import_function(str(model_path), "tokenizer_porter")
+    function_to_call = dynamic_import_function(str(model_path), "preprocess_tweet")
     if function_to_call:
-        print(f"✅ Function tokenizer_porter found in: {model_path}")
+        print(f"✅ Function preprocess_tweet found in: {model_path}")
         result = function_to_call(**data.dict())  # Pass Pydantic model data as function arguments
-        return Tokenizer_porterOutput(result=result)
+        return PreprocessTweetOutput(result=result)
 
-    raise HTTPException(status_code=404, detail="Function 'tokenizer_porter' not found in generated models")
+    raise HTTPException(status_code=404, detail="Function 'preprocess_tweet' not found in generated models")

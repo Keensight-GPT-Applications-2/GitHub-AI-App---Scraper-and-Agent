@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.extractmentalhealth import ExtractmentalhealthInput, ExtractmentalhealthOutput
+from models.generated_models.Extractmentalhealth import ExtractmentalhealthInput, ExtractmentalhealthOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/extractmentalhealth_service/extractmentalhealth")
 def process_extractmentalhealth(data: ExtractmentalhealthInput):
     """Dynamically execute extractMentalHealth from generated models.""" 
-    model_path = MODELS_DIR / "extractmentalhealth.py"
+    model_path = MODELS_DIR / "Extractmentalhealth.py"
 
     function_to_call = dynamic_import_function(str(model_path), "extractMentalHealth")
     if function_to_call:

@@ -1,16 +1,17 @@
 """
-Auto-generated Pydantic Model: detecttypes
+Auto-generated Pydantic Model: Detecttypes
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
+import json
 
 class DetecttypesInput(BaseModel):
-    selfself: Any
-    tweet: Any
+    tweet: str
 
 class DetecttypesOutput(BaseModel):
     result: Optional[Any] = None
 
 def detectTypes(selfself, tweet) -> Optional[Any]:
     """No docstring provided."""
-    return {'status': 'success', 'processed_data': {param: param for param in [selfself, tweet]}}
+    import json  # Ensure json is imported in each function
+    return {'status': 'success', 'processed_data': json.dumps(request)}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.wordcloud import WordcloudInput, WordcloudOutput
+from models.generated_models.Wordcloud import WordcloudInput, WordcloudOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/wordcloud_service/wordcloud")
 def process_wordcloud(data: WordcloudInput):
     """Dynamically execute wordCloud from generated models.""" 
-    model_path = MODELS_DIR / "wordcloud.py"
+    model_path = MODELS_DIR / "Wordcloud.py"
 
     function_to_call = dynamic_import_function(str(model_path), "wordCloud")
     if function_to_call:

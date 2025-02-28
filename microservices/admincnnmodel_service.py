@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.admincnnmodel import AdmincnnmodelInput, AdmincnnmodelOutput
+from models.generated_models.Admincnnmodel import AdmincnnmodelInput, AdmincnnmodelOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/admincnnmodel_service/admincnnmodel")
 def process_admincnnmodel(data: AdmincnnmodelInput):
     """Dynamically execute adminCNNModel from generated models.""" 
-    model_path = MODELS_DIR / "admincnnmodel.py"
+    model_path = MODELS_DIR / "Admincnnmodel.py"
 
     function_to_call = dynamic_import_function(str(model_path), "adminCNNModel")
     if function_to_call:

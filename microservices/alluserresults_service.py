@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.alluserresults import AlluserresultsInput, AlluserresultsOutput
+from models.generated_models.Alluserresults import AlluserresultsInput, AlluserresultsOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/alluserresults_service/alluserresults")
 def process_alluserresults(data: AlluserresultsInput):
     """Dynamically execute AllUserResults from generated models.""" 
-    model_path = MODELS_DIR / "alluserresults.py"
+    model_path = MODELS_DIR / "Alluserresults.py"
 
     function_to_call = dynamic_import_function(str(model_path), "AllUserResults")
     if function_to_call:

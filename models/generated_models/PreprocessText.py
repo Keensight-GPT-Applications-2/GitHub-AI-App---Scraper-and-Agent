@@ -1,18 +1,17 @@
 """
-Auto-generated Pydantic Model: Extractauthorswithtimestamp
+Auto-generated Pydantic Model: PreprocessText
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
 import json
 
-class ExtractauthorswithtimestampInput(BaseModel):
-    fromFile: str
-    toFile: str
+class PreprocessTextInput(BaseModel):
+    sen: str
 
-class ExtractauthorswithtimestampOutput(BaseModel):
+class PreprocessTextOutput(BaseModel):
     result: Optional[Any] = None
 
-def extractAuthorsWithTimestamp(fromFile, toFile) -> Optional[Any]:
+def preprocess_text(sen) -> Optional[Any]:
     """No docstring provided."""
     import json  # Ensure json is imported in each function
     return {'status': 'success', 'processed_data': json.dumps(request)}

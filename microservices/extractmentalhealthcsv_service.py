@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.extractmentalhealthcsv import ExtractmentalhealthcsvInput, ExtractmentalhealthcsvOutput
+from models.generated_models.Extractmentalhealthcsv import ExtractmentalhealthcsvInput, ExtractmentalhealthcsvOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/extractmentalhealthcsv_service/extractmentalhealthcsv")
 def process_extractmentalhealthcsv(data: ExtractmentalhealthcsvInput):
     """Dynamically execute extractMentalHealthCSV from generated models.""" 
-    model_path = MODELS_DIR / "extractmentalhealthcsv.py"
+    model_path = MODELS_DIR / "Extractmentalhealthcsv.py"
 
     function_to_call = dynamic_import_function(str(model_path), "extractMentalHealthCSV")
     if function_to_call:

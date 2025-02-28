@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.extractauthorswithtimestamp import ExtractauthorswithtimestampInput, ExtractauthorswithtimestampOutput
+from models.generated_models.Extractauthorswithtimestamp import ExtractauthorswithtimestampInput, ExtractauthorswithtimestampOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/extractauthorswithtimestamp_service/extractauthorswithtimestamp")
 def process_extractauthorswithtimestamp(data: ExtractauthorswithtimestampInput):
     """Dynamically execute extractAuthorsWithTimestamp from generated models.""" 
-    model_path = MODELS_DIR / "extractauthorswithtimestamp.py"
+    model_path = MODELS_DIR / "Extractauthorswithtimestamp.py"
 
     function_to_call = dynamic_import_function(str(model_path), "extractAuthorsWithTimestamp")
     if function_to_call:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.adminlogincheck import AdminlogincheckInput, AdminlogincheckOutput
+from models.generated_models.Adminlogincheck import AdminlogincheckInput, AdminlogincheckOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/adminlogincheck_service/adminlogincheck")
 def process_adminlogincheck(data: AdminlogincheckInput):
     """Dynamically execute AdminLoginCheck from generated models.""" 
-    model_path = MODELS_DIR / "adminlogincheck.py"
+    model_path = MODELS_DIR / "Adminlogincheck.py"
 
     function_to_call = dynamic_import_function(str(model_path), "AdminLoginCheck")
     if function_to_call:

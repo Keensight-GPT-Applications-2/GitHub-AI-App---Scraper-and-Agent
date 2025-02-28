@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.extractsuicidalwatch import ExtractsuicidalwatchInput, ExtractsuicidalwatchOutput
+from models.generated_models.Extractsuicidalwatch import ExtractsuicidalwatchInput, ExtractsuicidalwatchOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/extractsuicidalwatch_service/extractsuicidalwatch")
 def process_extractsuicidalwatch(data: ExtractsuicidalwatchInput):
     """Dynamically execute extractSuicidalWatch from generated models.""" 
-    model_path = MODELS_DIR / "extractsuicidalwatch.py"
+    model_path = MODELS_DIR / "Extractsuicidalwatch.py"
 
     function_to_call = dynamic_import_function(str(model_path), "extractSuicidalWatch")
     if function_to_call:

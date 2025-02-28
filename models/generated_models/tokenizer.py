@@ -1,8 +1,9 @@
 """
-Auto-generated Pydantic Model: tokenizer
+Auto-generated Pydantic Model: Tokenizer
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
+import json
 
 class TokenizerInput(BaseModel):
     text: str
@@ -12,4 +13,5 @@ class TokenizerOutput(BaseModel):
 
 def tokenizer(text) -> Optional[Any]:
     """No docstring provided."""
-    return {'status': 'success', 'processed_data': {param: param for param in [text]}}
+    import json  # Ensure json is imported in each function
+    return {'status': 'success', 'processed_data': json.dumps(request)}

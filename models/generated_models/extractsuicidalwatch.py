@@ -1,15 +1,17 @@
 """
-Auto-generated Pydantic Model: extractsuicidalwatch
+Auto-generated Pydantic Model: Extractsuicidalwatch
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
+import json
 
 class ExtractsuicidalwatchInput(BaseModel):
-    reddit: Any
+    reddit: Dict[str, Any]
 
 class ExtractsuicidalwatchOutput(BaseModel):
     result: Optional[Any] = None
 
 def extractSuicidalWatch(reddit) -> Optional[Any]:
     """No docstring provided."""
-    return {'status': 'success', 'processed_data': {param: param for param in [reddit]}}
+    import json  # Ensure json is imported in each function
+    return {'status': 'success', 'processed_data': json.dumps(request)}

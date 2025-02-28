@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.preprocess import PreprocessInput, PreprocessOutput
+from models.generated_models.Preprocess import PreprocessInput, PreprocessOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/preprocess_service/preprocess")
 def process_preprocess(data: PreprocessInput):
     """Dynamically execute preProcess from generated models.""" 
-    model_path = MODELS_DIR / "preprocess.py"
+    model_path = MODELS_DIR / "Preprocess.py"
 
     function_to_call = dynamic_import_function(str(model_path), "preProcess")
     if function_to_call:

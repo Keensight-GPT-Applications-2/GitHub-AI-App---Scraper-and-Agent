@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.tokenizer import TokenizerInput, TokenizerOutput
+from models.generated_models.Tokenizer import TokenizerInput, TokenizerOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/tokenizer_service/tokenizer")
 def process_tokenizer(data: TokenizerInput):
     """Dynamically execute tokenizer from generated models.""" 
-    model_path = MODELS_DIR / "tokenizer.py"
+    model_path = MODELS_DIR / "Tokenizer.py"
 
     function_to_call = dynamic_import_function(str(model_path), "tokenizer")
     if function_to_call:

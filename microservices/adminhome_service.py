@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.adminhome import AdminhomeInput, AdminhomeOutput
+from models.generated_models.Adminhome import AdminhomeInput, AdminhomeOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/adminhome_service/adminhome")
 def process_adminhome(data: AdminhomeInput):
     """Dynamically execute AdminHome from generated models.""" 
-    model_path = MODELS_DIR / "adminhome.py"
+    model_path = MODELS_DIR / "Adminhome.py"
 
     function_to_call = dynamic_import_function(str(model_path), "AdminHome")
     if function_to_call:

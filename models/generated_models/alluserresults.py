@@ -1,15 +1,17 @@
 """
-Auto-generated Pydantic Model: alluserresults
+Auto-generated Pydantic Model: Alluserresults
 """
 from pydantic import BaseModel
 from typing import Any, Optional, Dict
+import json
 
 class AlluserresultsInput(BaseModel):
-    request: Dict[str, Any]
+    request: Any
 
 class AlluserresultsOutput(BaseModel):
     result: Optional[Any] = None
 
 def AllUserResults(request) -> Optional[Any]:
     """No docstring provided."""
-    return {'status': 'success', 'processed_data': {param: param for param in [request]}}
+    import json  # Ensure json is imported in each function
+    return {'status': 'success', 'processed_data': json.dumps(request)}

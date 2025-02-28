@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.extractalldataforcommonauthors import ExtractalldataforcommonauthorsInput, ExtractalldataforcommonauthorsOutput
+from models.generated_models.Extractalldataforcommonauthors import ExtractalldataforcommonauthorsInput, ExtractalldataforcommonauthorsOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/extractalldataforcommonauthors_service/extractalldataforcommonauthors")
 def process_extractalldataforcommonauthors(data: ExtractalldataforcommonauthorsInput):
     """Dynamically execute extractAllDataForCommonAuthors from generated models.""" 
-    model_path = MODELS_DIR / "extractalldataforcommonauthors.py"
+    model_path = MODELS_DIR / "Extractalldataforcommonauthors.py"
 
     function_to_call = dynamic_import_function(str(model_path), "extractAllDataForCommonAuthors")
     if function_to_call:

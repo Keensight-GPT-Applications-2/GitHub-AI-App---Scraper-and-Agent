@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.generated_models.detecttypes import DetecttypesInput, DetecttypesOutput
+from models.generated_models.Detecttypes import DetecttypesInput, DetecttypesOutput
 import importlib.util
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def dynamic_import_function(module_path, function_name):
 @router.post("/detecttypes_service/detecttypes")
 def process_detecttypes(data: DetecttypesInput):
     """Dynamically execute detectTypes from generated models.""" 
-    model_path = MODELS_DIR / "detecttypes.py"
+    model_path = MODELS_DIR / "Detecttypes.py"
 
     function_to_call = dynamic_import_function(str(model_path), "detectTypes")
     if function_to_call:
