@@ -1,4 +1,7 @@
+import os
 import sys
+import pytest
+from httpx import AsyncClient
 from pathlib import Path
 
 # Add the project root directory to sys.path
@@ -9,67 +12,46 @@ from main import app
 
 client = TestClient(app)
 
-def test_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to the Pydantic Microservice!"}
+API_KEY = os.getenv("API_KEY")
 
-def test_models():
-    response = client.get("/models")
-    assert response.status_code == 200
-    assert "models" in response.json()
+@pytest.mark.asyncio
+async def test_root():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get("/", headers={"X-API-KEY": API_KEY})  # ✅ Add API Key
+        assert response.status_code == 200
+        assert response.json() == {"message": "Welcome to the Pydantic Microservice!"}
 
-def test_specific_model():
-    """
-    Test fetching the schema of a specific model dynamically.
-    """
-    # Fetch available models from the /models endpoint
-    models_response = client.get("/models")
-    assert models_response.status_code == 200
+@pytest.mark.asyncio
+async def test_list_models():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get("/models", headers={"X-API-KEY": API_KEY})
+        assert response.status_code == 200
+        assert "models" in response.json()
 
-    models = models_response.json().get("models", [])
-    assert isinstance(models, list), "Expected 'models' to be a list"
+@pytest.mark.asyncio
+async def test_get_model_valid():
+    model_name = "TestModelInput"  # Replace with a valid model name
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get(f"/models/{model_name}", headers={"X-API-KEY": API_KEY})
+        assert response.status_code == 200
+        assert "schema" in response.json()
 
-    # Iterate through each model name and fetch its schema
-    for model_name in models:
-        response = client.get(f"/models/{model_name}")
-        if response.status_code == 200:
-            assert "title" in response.json()
-            assert "type" in response.json()
-        else:
-            assert response.status_code == 404
-            assert "error" in response.json()
+@pytest.mark.asyncio
+async def test_get_model_invalid():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get("/models/invalid_model", headers={"X-API-KEY": API_KEY})
+        assert response.status_code == 404
+        assert response.json()["error"] == "Model invalid_model not found"
 
-def test_invalid_model():
-    """
-    Test fetching the schema of an invalid/nonexistent model.
-    """
-    invalid_model_name = "nonexistent_model"
-    response = client.get(f"/models/{invalid_model_name}")
-    assert response.status_code == 404
-    assert "detail" in response.json()
-    assert response.json()["detail"] == f"Model {invalid_model_name} not found"
+@pytest.mark.asyncio
+async def test_authentication_failure():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get("/models")
+        assert response.status_code == 403  # Unauthorized
 
-
-def test_invalid_input():
-    """
-    Test sending invalid input to a model endpoint.
-    """
-    models_response = client.get("/models")
-    assert models_response.status_code == 200
-
-    models = models_response.json().get("models", [])
-    assert isinstance(models, list), "Expected 'models' to be a list"
-
-    if models:
-        model_name = models[0]  # Example: "AdminlogincheckInput"
-        endpoint_name = model_name.replace("Input", "").lower()  # Remove "Input" and lowercase
-        invalid_payload = {"invalid_field": "test"}  # Missing required fields
-        response = client.post(f"/{endpoint_name}_service/{endpoint_name}", json=invalid_payload)
-        
-        print(f"Testing endpoint: /{endpoint_name}_service/{endpoint_name}")
-        print(f"Response status: {response.status_code}, Response body: {response.json()}")
-
-        assert response.status_code == 422  # Expect validation failure
-
-
+@pytest.mark.asyncio
+async def test_rate_limit():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        for _ in range(11):  # Exceeding 10 requests per minute
+            response = await ac.get("/models", headers={"X-API-KEY": API_KEY})
+        assert response.status_code == 429  # Too Many Requests

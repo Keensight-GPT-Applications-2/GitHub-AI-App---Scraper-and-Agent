@@ -6,7 +6,7 @@ from typing import Any, Optional, Dict
 import json
 
 class AdminhomeInput(BaseModel):
-    request: Any
+    request: Dict[str, Any]
 
 class AdminhomeOutput(BaseModel):
     result: Optional[Any] = None
