@@ -35,7 +35,7 @@ GitHub Scraper is an AI-driven system that discovers, fetches, and processes pub
 
 ### 2️⃣ Clone the Repository
 ```sh
-git clone https://github.com/yourusername/github-scraper.git
+https://github.com/Keensight-GPT-Applications-2/GitHub-AI-App---Scraper-and-Agent
 cd github-scraper
 ```
 
