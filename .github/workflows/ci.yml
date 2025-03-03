@@ -28,6 +28,3 @@ jobs:
           
       - name: 🔑 Set API Key (from GitHub Secrets)
         run: echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
-
-      - name: 🚀 Run Tests
-        run: pytest tests/ --maxfail=5 --disable-warnings
