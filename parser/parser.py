@@ -1,6 +1,8 @@
 import os
 import ast
 import sys
+import subprocess
+import json
 from pathlib import Path
 
 # Ensure correct imports from updated generator
@@ -18,22 +20,23 @@ def extract_return_type(node):
     else:
         return "Optional[Any]"
 
+def is_public_function(function_name):
+    """Check if a function is public (not private or internal)."""
+    return not function_name.startswith("_")
+
 def parse_python_file(file_path):
     """Parse a Python file and extract functions, classes, and docstrings."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             source_code = f.read()
 
-        # Parse the file using AST
         tree = ast.parse(source_code)
-
         functions = []
         classes = []
 
-        # Walk through the AST nodes
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                params = [arg.arg for arg in node.args.args if arg.arg != "self"]  # Remove 'self'
+            if isinstance(node, ast.FunctionDef) and is_public_function(node.name):
+                params = [arg.arg for arg in node.args.args if arg.arg != "self"]
                 return_type = extract_return_type(node.returns) if node.returns else "Optional[Any]"
 
                 functions.append({
@@ -47,7 +50,7 @@ def parse_python_file(file_path):
                 classes.append({
                     "name": node.name,
                     "docstring": ast.get_docstring(node) or "No docstring provided.",
-                    "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef)]
+                    "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef) and is_public_function(n.name)]
                 })
 
         return {"functions": functions, "classes": classes}
@@ -56,20 +59,44 @@ def parse_python_file(file_path):
         print(f"❌ SyntaxError in file {file_path}: {e}")
         return {"functions": [], "classes": []}
 
+def parse_javascript_file(file_path):
+    """Parse a JavaScript file using Esprima and extract functions."""
+    try:
+        result = subprocess.run(["node", "parse_js.js", file_path], capture_output=True, text=True)
+        return json.loads(result.stdout) if result.stdout else {"functions": [], "classes": []}
+    except Exception as e:
+        print(f"❌ Error parsing JavaScript file {file_path}: {e}")
+        return {"functions": [], "classes": []}
+
+def parse_go_file(file_path):
+    """Parse a Go file using a Go parser script and extract functions."""
+    try:
+        result = subprocess.run(["go", "run", "parse_go.go", file_path], capture_output=True, text=True)
+        return json.loads(result.stdout) if result.stdout else {"functions": [], "classes": []}
+    except Exception as e:
+        print(f"❌ Error parsing Go file {file_path}: {e}")
+        return {"functions": [], "classes": []}
+
 def parse_directory(directory_path):
-    """Parse all Python files in a directory."""
+    """Parse all Python, JavaScript, and Go files in a directory."""
     directory_path = Path(directory_path)
     if not directory_path.exists():
         print(f"❌ Error: Directory '{directory_path}' does not exist.")
         return {}
 
     results = {}
-
-    # Traverse all Python files recursively
-    for file_path in directory_path.rglob("*.py"):
-        print(f"📂 Parsing {file_path}...")
-        results[file_path.name] = parse_python_file(file_path)
-
+    
+    for file_path in directory_path.rglob("*"):
+        if file_path.suffix == ".py":
+            print(f"📂 Parsing Python file: {file_path}...")
+            results[file_path.name] = parse_python_file(file_path)
+        elif file_path.suffix == ".js":
+            print(f"📂 Parsing JavaScript file: {file_path}...")
+            results[file_path.name] = parse_javascript_file(file_path)
+        elif file_path.suffix == ".go":
+            print(f"📂 Parsing Go file: {file_path}...")
+            results[file_path.name] = parse_go_file(file_path)
+    
     return results
 
 def get_latest_scraped_repo(base_dir):
@@ -78,13 +105,10 @@ def get_latest_scraped_repo(base_dir):
     if not base_dir.exists():
         print(f"❌ Error: Base directory '{base_dir}' does not exist.")
         return None
-
-    # Find the most recently modified folder in the base directory
     latest_repo = max(base_dir.glob("*/"), key=os.path.getmtime, default=None)
     return latest_repo
 
 if __name__ == "__main__":
-    # Automatically locate the latest scraped repository
     base_scraped_dir = "../scraper/scraped_repos"
     latest_repo_dir = get_latest_scraped_repo(base_scraped_dir)
 
@@ -92,30 +116,9 @@ if __name__ == "__main__":
         print(f"🚀 Parsing the latest repository: {latest_repo_dir}")
         parsed_results = parse_directory(latest_repo_dir)
 
-        # Display extracted information
         if parsed_results:
-            for file_name, content in parsed_results.items():
-                print(f"\n📄 File: {file_name}")
-                if content["functions"] or content["classes"]:
-                    print("🔹 Functions:")
-                    for func in content["functions"]:
-                        print(f"  - Name: {func['name']}")
-                        print(f"    📜 Docstring: {func['docstring']}")
-                        print(f"    🎯 Parameters: {func['parameters']}")
-                        print(f"    🔄 Return Type: {func['return_type']}")
-                    print("📌 Classes:")
-                    for cls in content["classes"]:
-                        print(f"  - Name: {cls['name']}")
-                        print(f"    📜 Docstring: {cls['docstring']}")
-                        print(f"    🛠 Methods: {cls['methods']}")
-                else:
-                    print("⚠️ No functions or classes found in this file.")
-
-            # ✅ Generate Pydantic Models with correct arguments
-            print("\n🚀 Generating Pydantic models using DeepSeek...")
+            print("\n🚀 Generating Pydantic models...")
             models = generate_pydantic_models(parsed_results)
-
-            # ✅ Save the models to files in the correct directory
             print("\n💾 Saving Pydantic models...")
             save_pydantic_models(models)
 

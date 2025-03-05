@@ -77,7 +77,7 @@ def dynamic_import_function(module_path, function_name):
     
     return getattr(module, function_name, None)
 """
-
+        
         # Add endpoints dynamically based on detected functions
         for function_name, params in functions:
             endpoint_name = function_name.lower()

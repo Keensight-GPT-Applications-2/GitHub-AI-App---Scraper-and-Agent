@@ -116,9 +116,9 @@ async def download_file(owner: str, repo: str, file_path: str, save_dir: Path):
             f.write(file_content)
         print(f"✅ Successfully downloaded: {file_path}")
 
-# Scrape GitHub repository with improved error handling
-async def scrape_github_repo(owner: str, repo: str, file_extension: str = ".py"):
-    """Scrape all files with a given extension from a GitHub repository."""
+# Scrape GitHub repository with multiple file extensions
+async def scrape_github_repo(owner: str, repo: str, file_extensions: List[str] = [".py", ".js", ".go"]):
+    """Scrape all specified file types from a GitHub repository."""
     save_dir = Path(f"scraped_repos/{owner}/{repo}")
     save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -136,7 +136,7 @@ async def scrape_github_repo(owner: str, repo: str, file_extension: str = ".py")
     print("📂 Downloading files...")
     tasks = []
     for item in tree:
-        if item["type"] == "blob" and item["path"].endswith(file_extension):
+        if item["type"] == "blob" and any(item["path"].endswith(ext) for ext in file_extensions):
             print(f"⬇️ Downloading: {item['path']}")
             tasks.append(download_file(owner, repo, item["path"], save_dir))
 
