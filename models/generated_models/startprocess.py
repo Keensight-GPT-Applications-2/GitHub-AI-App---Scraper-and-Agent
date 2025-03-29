@@ -13,5 +13,4 @@ class StartprocessOutput(BaseModel):
 
 def startProcess() -> Optional[Any]:
     """No docstring provided."""
-    import json  # Ensure json is imported in each function
-    return {'status': 'success', 'processed_data': json.dumps(request)}
+    return {'status': 'success'}

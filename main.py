@@ -11,9 +11,11 @@ from pathlib import Path
 import importlib.util
 from importlib import import_module
 from pydantic import BaseModel
-from aiocache import SimpleMemoryCache
 from aiocache.decorators import cached
 from loguru import logger
+from aiocache import caches, SimpleMemoryCache
+
+caches.set_config({"default": {"cache": "aiocache.SimpleMemoryCache"}})
 
 # ✅ Configure Loguru for structured logging
 logger.add("app.log", rotation="10MB", retention="7 days", level="INFO", format="{time} {level} {message}")
@@ -31,7 +33,7 @@ app = FastAPI(
 cache = SimpleMemoryCache()
 
 # ✅ API Key Authentication
-API_KEY = os.getenv("API_KEY")  # Set this in your .env file
+API_KEY = os.getenv("KEY_API")  # Set this in your .env file
 API_KEY_NAME = "X-API-KEY"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
@@ -43,8 +45,14 @@ def verify_api_key(api_key: str = Depends(api_key_header)):
 @app.middleware("http")
 async def api_key_middleware(request: Request, call_next):
     api_key = request.headers.get(API_KEY_NAME)
+
+    # Debugging: Print received and expected API key
+    print(f"🔑 Received API Key: {api_key}")
+    print(f"✅ Expected API Key: {API_KEY}")
+
     if api_key != API_KEY:
         return JSONResponse(status_code=403, content={"detail": "Unauthorized: Invalid API Key"})
+
     return await call_next(request)
 
 # ✅ Rate Limiting (10 requests per minute per IP)
