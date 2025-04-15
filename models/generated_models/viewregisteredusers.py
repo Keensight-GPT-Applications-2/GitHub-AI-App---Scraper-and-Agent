@@ -6,7 +6,7 @@ from typing import Any, Optional, Dict
 import json
 
 class ViewregisteredusersInput(BaseModel):
-    request: Dict[str, Any]
+    request: Any
 
 class ViewregisteredusersOutput(BaseModel):
     result: Optional[Any] = None
