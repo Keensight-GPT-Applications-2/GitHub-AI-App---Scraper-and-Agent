@@ -25,10 +25,13 @@ logger.add("app.log", rotation="10MB", retention="7 days", level="INFO", format=
 # Initialize FastAPI
 app = FastAPI(
     title="Pydantic Microservice API",
-    description="This API provides microservices for handling Pydantic models dynamically.",
+    description="This API provides microservices for handling Pydantic models dynamically. "
+                "Use this API to interact with dynamic Pydantic models for data processing, "
+                "and experience the ease of integration with various services.",
     version="1.0.0",
-    docs_url="/docs",
-    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
+    docs_url="/docs",  # Swagger UI URL
+    redoc_url="/redoc",  # Optional: Enable ReDoc UI documentation
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1},  # Expand depth for model details
 )
 
 # API Key Auth
@@ -41,13 +44,13 @@ def verify_api_key(api_key: str = Depends(api_key_header)):
         raise HTTPException(status_code=403, detail="Unauthorized: Invalid API Key")
     return api_key
 
-# API Key check middleware
-@app.middleware("http")
-async def api_key_middleware(request: Request, call_next):
-    api_key = request.headers.get(API_KEY_NAME)
-    if api_key != API_KEY:
-        return JSONResponse(status_code=403, content={"detail": "Unauthorized: Invalid API Key"})
-    return await call_next(request)
+# # API Key check middleware
+# @app.middleware("http")
+# async def api_key_middleware(request: Request, call_next):
+#     api_key = request.headers.get(API_KEY_NAME)
+#     if api_key != API_KEY:
+#         return JSONResponse(status_code=403, content={"detail": "Unauthorized: Invalid API Key"})
+#     return await call_next(request)
 
 # Request logging with performance timing
 @app.middleware("http")
@@ -75,9 +78,26 @@ app.add_middleware(
 )
 
 # Rate limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.extension import _rate_limit_exceeded_handler as default_rate_limit_handler
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
-app.add_exception_handler(HTTPException, _rate_limit_exceeded_handler)
+
+# Custom rate limit exceeded handler to avoid AttributeError
+@app.exception_handler(RateLimitExceeded)
+async def custom_rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    try:
+        return await default_rate_limit_handler(request, exc)
+    except AttributeError:
+        # Fallback response if view_rate_limit attribute is missing
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded"},
+            headers={"Retry-After": "60"},
+        )
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # Load models from generated files

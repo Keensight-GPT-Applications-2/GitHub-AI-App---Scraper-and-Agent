@@ -1,16 +1,24 @@
 """
-Auto-generated Pydantic Model: Adminhome
+Auto-generated Pydantic Model for Adminhome
 """
-from pydantic import BaseModel
-from typing import Any, Optional, Dict
+from pydantic import BaseModel, Field
+from typing import Any, Optional, Dict, List, Union
+from datetime import datetime
 import json
+
+
 
 class AdminhomeInput(BaseModel):
     request: Any
 
-class AdminhomeOutput(BaseModel):
-    result: Optional[Any] = None
 
-def AdminHome(request) -> Optional[Any]:
+class AdminhomeOutput(BaseModel):
+    result: Optional[Any]
+
+
+def AdminHome(request) -> Dict[str, Any]:
     """No docstring provided."""
-    return {'status': 'success'}
+    # Implementation goes here
+    return {
+        "result": None
+    }

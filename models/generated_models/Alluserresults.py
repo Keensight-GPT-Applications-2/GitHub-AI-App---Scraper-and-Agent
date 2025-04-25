@@ -1,16 +1,28 @@
 """
-Auto-generated Pydantic Model: Alluserresults
+Auto-generated Pydantic Model for Alluserresults
 """
-from pydantic import BaseModel
-from typing import Any, Optional, Dict
+from pydantic import BaseModel, Field
+from typing import Any, Optional, Dict, List, Union
+from datetime import datetime
 import json
+
+
 
 class AlluserresultsInput(BaseModel):
     request: Any
 
-class AlluserresultsOutput(BaseModel):
-    result: Optional[Any] = None
 
-def AllUserResults(request) -> Optional[Any]:
+class AlluserresultsOutput(BaseModel):
+    users: List[Dict[str, Any]]
+    count: int
+    success: bool
+
+
+def AllUserResults(request) -> Dict[str, Any]:
     """No docstring provided."""
-    return {'status': 'success'}
+    # Implementation goes here
+    return {
+        "users": [],
+        "count": 0,
+        "success": True
+    }

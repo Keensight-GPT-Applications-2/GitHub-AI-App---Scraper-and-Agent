@@ -51,8 +51,19 @@ def parse_python_file(file_path):
 
         for node in ast.iter_child_nodes(tree):  # More efficient than ast.walk
             try:
-                if isinstance(node, ast.FunctionDef) and is_public_function(node.name):
-                    params = [arg.arg for arg in node.args.args if arg.arg != "self"]
+                if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
+                    params = []
+                    for arg in node.args.args:
+                        if arg.arg != "self":
+                            if arg.annotation:
+                                annotation = ast.unparse(arg.annotation) if hasattr(ast, 'unparse') else None
+                                params.append({"name": arg.arg, "type": annotation or "Any"})
+                            else:
+                                # Heuristic: if parameter name is 'request', infer type as 'HttpRequest'
+                                if arg.arg == "request":
+                                    params.append({"name": arg.arg, "type": "HttpRequest"})
+                                else:
+                                    params.append({"name": arg.arg, "type": "Any"})
                     return_type = extract_return_type(node.returns) if node.returns else "Optional[Any]"
                     functions.append({
                         "name": node.name,
@@ -64,7 +75,7 @@ def parse_python_file(file_path):
                 elif isinstance(node, ast.ClassDef):
                     class_methods = []
                     for sub_node in node.body:
-                        if isinstance(sub_node, ast.FunctionDef) and is_public_function(sub_node.name):
+                        if isinstance(sub_node, ast.FunctionDef) and not sub_node.name.startswith("_"):
                             class_methods.append(sub_node.name)
                     classes.append({
                         "name": node.name,
@@ -74,7 +85,7 @@ def parse_python_file(file_path):
             except Exception as inner_e:
                 print(f"⚠️ Skipping node due to error: {inner_e}")
 
-        return {"functions": functions, "classes": classes}
+        return {"functions": functions, "classes": classes, "language": "python"}
 
     except (SyntaxError, UnicodeDecodeError) as e:
         print(f"❌ Failed to parse {file_path}: {e}")
@@ -86,7 +97,7 @@ def parse_javascript_file(file_path):
         return json.loads(result.stdout) if result.stdout else {"functions": [], "classes": []}
     except Exception as e:
         print(f"❌ Error parsing JavaScript file {file_path}: {e}")
-        return {"functions": [], "classes": []}
+        return {"functions": [], "classes": [], "language": "javascript"}
 
 def parse_go_file(file_path):
     try:
@@ -94,7 +105,7 @@ def parse_go_file(file_path):
         return json.loads(result.stdout) if result.stdout else {"functions": [], "classes": []}
     except Exception as e:
         print(f"❌ Error parsing Go file {file_path}: {e}")
-        return {"functions": [], "classes": []}
+        return {"functions": [], "classes": [], "language": "go"}
 
 def parse_directory(directory_path):
     directory_path = Path(directory_path)

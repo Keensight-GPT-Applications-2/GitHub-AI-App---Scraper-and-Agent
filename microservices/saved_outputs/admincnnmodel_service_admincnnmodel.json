@@ -1,0 +1,11 @@
+[
+    {
+        "model_name": "Dell",
+        "model_config": {},
+        "training_data": [
+            "data/iamges"
+        ],
+        "epochs": 41,
+        "batch_size": 52
+    }
+]
